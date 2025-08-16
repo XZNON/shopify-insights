@@ -1,4 +1,5 @@
 from fastapi import FastAPI,HTTPException,BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from .models import ScrapeRequest,BrandData,Product,ContanctDetails,CompetitorAnalysis,LLMResponse
 from .competitorAnalysis import find_competitors
 from pydantic import ValidationError
@@ -11,6 +12,7 @@ import requests
 
 app = FastAPI()
 
+
 @app.get("/")
 def home():
     return {"message":"This is the homepage for shopify insights"}
@@ -18,12 +20,12 @@ def home():
 @app.post("/get-insigts", response_model = BrandData,response_model_exclude_none=True)
 def scrape_store(request : ScrapeRequest,background_tasks : BackgroundTasks):
     try:
-        insigts = scrape_all_insights(str(request.websiteUrl))
+        insigts = scrape_all_insights(str(request.website_url))
 
         response = BrandData.from_scraper_data(insigts)
 
         #adding to the database
-        background_tasks.add_task(saveBrandData,response,str(request.websiteUrl))
+        background_tasks.add_task(saveBrandData,response,str(request.website_url))
 
 
         return response
