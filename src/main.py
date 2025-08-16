@@ -1,8 +1,11 @@
 from fastapi import FastAPI,HTTPException,BackgroundTasks
-from .models import ScrapeRequest,BrandData,Product,ContanctDetails,CompetitorAnalysis
+from .models import ScrapeRequest,BrandData,Product,ContanctDetails,CompetitorAnalysis,LLMResponse
 from .competitorAnalysis import find_competitors
 from pydantic import ValidationError
+from .llm import get_llm_competitor_analysis
 from .scraper.shopify_scraper import scrape_all_insights,isShopify
+from typing import Dict
+
 from .db import saveBrandData
 import requests
 
@@ -84,3 +87,40 @@ def competitors(request : ScrapeRequest,background_tasks : BackgroundTasks):
             status_code=500,
             detail=f"An error occurred during the process for {main_brand_url}: {e}"
         )
+
+@app.post("/llm-competitor-analysis", response_model=Dict, response_model_exclude_none=True)
+def llm_competitor_analysis(request: ScrapeRequest):
+    try:
+        main_brand_url = str(request.website_url)
+        main_insights_dict = scrape_all_insights(main_brand_url)
+        main_brand_data = BrandData.from_scraper_data(main_insights_dict)
+
+        competitor_urls = find_competitors(main_brand_url, num_results=2)
+        competitor_insights_list = []
+        for url in competitor_urls:
+            if isShopify(url):
+                try:
+                    insights = scrape_all_insights(url)
+                    competitor_data = BrandData.from_scraper_data(insights)
+                    competitor_insights_list.append(competitor_data)
+                except Exception as e:
+                    print(f"Skipping failed competitor scrape for {url}: {e}")
+
+        llm_summary = {}
+        if competitor_insights_list:
+            llm_summary = get_llm_competitor_analysis(main_brand_data, competitor_insights_list)
+        else:
+            llm_summary = {"error": "No valid competitors found for comparison."}
+
+        return {
+            "brandData": main_brand_data.model_dump(by_alias=True),
+            "competitors": [c.model_dump(by_alias=True) for c in competitor_insights_list],
+            "comparisonSummary": llm_summary
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred during the LLM analysis process for {main_brand_url}: {e}"
+        )
+

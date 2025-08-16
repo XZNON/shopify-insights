@@ -1,6 +1,7 @@
 from pydantic import BaseModel,HttpUrl,Field,field_validator,ConfigDict
 from typing import List,Dict,Optional,Any
 
+
 class ScrapeRequest(BaseModel):
     website_url : HttpUrl = Field(...,alias='websiteUrl')
 
@@ -68,3 +69,16 @@ class CompetitorAnalysis(BaseModel):
     competitors : List[BrandData] = []
 
     model_config = ConfigDict(populate_by_name=True)
+
+class CompetitorComparison(BaseModel):
+    product_comparison: str = Field(description="A comparison of the product catalogs, variety, and unique selling propositions.")
+    pricing_strategy: str = Field(description="An analysis of the likely pricing strategies (e.g., budget, premium, competitive).")
+    brand_voice_and_target_audience: str = Field(description="A comparison of the brand messaging, tone, and likely target audience.")
+    overall_summary: str = Field(description="A concluding summary of the competitive landscape.")
+
+class LLMResponse(BaseModel):
+    brand_data : BrandData
+    competitors : List[BrandData] = []
+    comparison_summary : CompetitorComparison
+
+
