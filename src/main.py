@@ -90,6 +90,8 @@ def competitors(request : ScrapeRequest,background_tasks : BackgroundTasks):
 
 @app.post("/llm-competitor-analysis", response_model=Dict, response_model_exclude_none=True)
 def llm_competitor_analysis(request: ScrapeRequest):
+
+    main_brand_url = str(request.website_url)
     try:
         main_brand_url = str(request.website_url)
         main_insights_dict = scrape_all_insights(main_brand_url)
