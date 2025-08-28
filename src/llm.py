@@ -6,7 +6,10 @@ from .models import BrandData,CompetitorComparison
 from pydantic import BaseModel,Field
 from typing import List, Dict, Any
 import typing
+from dotenv import load_dotenv
 
+#place your LLM key in the .env folder
+load_dotenv()
 
 def get_llm_competitor_analysis(main_brand: BrandData, competitors: List[BrandData]) -> Dict[str, Any]:
 

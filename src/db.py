@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- DATABASE CONFIGURATION ---
+# *************************** DATABASE CONFIGURATION ******
 # Replace with your actual MySQL credentials.
-# It's better to use environment variables for this in a real application.
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL:
@@ -17,12 +17,13 @@ if not DATABASE_URL:
 
 try:
     engine = create_engine(DATABASE_URL)
-    # Test the connection
+
     with engine.connect() as connection:
         print("Successfully connected to the MySQL database.")
 except Exception as e:
     print(f"Error connecting to the database: {e}")
     engine = None
+# *******************************************************************
 
 def saveBrandData(brand_data: BrandData, website_url: str):
     if not engine:
@@ -75,7 +76,6 @@ def saveBrandData(brand_data: BrandData, website_url: str):
         platform : str(url) for platform,url in brand_data.social_handles.items() if url
     }
 
-    #parameters for the SQL query
     params = {
         "website_url": website_url,
 

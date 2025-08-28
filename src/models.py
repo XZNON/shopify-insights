@@ -3,7 +3,7 @@ from typing import List,Dict,Optional,Any
 
 
 class ScrapeRequest(BaseModel):
-    website_url : HttpUrl = Field(...,alias='websiteUrl')
+    website_url : HttpUrl = Field(...,alias='websiteUrl',description="The url of the website")
 
 class Product(BaseModel):
     id : Optional[int] = None
@@ -49,7 +49,7 @@ class BrandData(BaseModel):
 
     @classmethod
     def from_scraper_data(cls, data: Dict[str, Any]) -> 'BrandData':
-        transformed_data = data.copy() # Start with the base data
+        transformed_data = data.copy()
         links = data.get('important_links', {})
 
         for key in ['privacy_policy', 'refund_policy', 'about_us', 'contact_us', 'faqs', 'blogs', 'track_order']:

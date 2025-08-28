@@ -44,7 +44,6 @@ def find_competitors(brand_url: str, num_results: int = 3) -> list[str]:
     print(f"Searching for competitors with query: '{query}'")
 
     competitor_urls = []
-    
 
     #code breaking :
     #add a checker to see if the competitor store is in shopiffy or not,

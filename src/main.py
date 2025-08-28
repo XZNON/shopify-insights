@@ -17,7 +17,7 @@ app = FastAPI()
 def home():
     return {"message":"This is the homepage for shopify insights"}
 
-@app.post("/get-insigts", response_model = BrandData,response_model_exclude_none=True)
+@app.post("/get-insigts", response_model = BrandData,response_model_exclude_none=True,description="Get the brand data, takes in the url for a store as input")
 def scrape_store(request : ScrapeRequest,background_tasks : BackgroundTasks):
     try:
         insigts = scrape_all_insights(str(request.website_url))
@@ -46,7 +46,7 @@ def scrape_store(request : ScrapeRequest,background_tasks : BackgroundTasks):
         )
 
 
-@app.post("/competitorAnalysis",response_model=CompetitorAnalysis,response_model_exclude_none=True)
+@app.post("/competitorAnalysis",response_model=CompetitorAnalysis,response_model_exclude_none=True,description="Finds competitors from google for the given webstore")
 def competitors(request : ScrapeRequest,background_tasks : BackgroundTasks):
     main_brand_url = str(request.website_url)
     
@@ -61,6 +61,7 @@ def competitors(request : ScrapeRequest,background_tasks : BackgroundTasks):
         
         competitor_insights_list = []
         for url in competitor_urls:
+            #shopify check
             if isShopify(url):  #now we can check if its a shopify store or not
 
                 try:
@@ -89,8 +90,10 @@ def competitors(request : ScrapeRequest,background_tasks : BackgroundTasks):
             status_code=500,
             detail=f"An error occurred during the process for {main_brand_url}: {e}"
         )
+    
 
-@app.post("/llm-competitor-analysis", response_model=Dict, response_model_exclude_none=True)
+#can store this in db but brand data might change overtime to doing it in real time is better
+@app.post("/llm-competitor-analysis", response_model=Dict, response_model_exclude_none=True,description="Runs the competitor analysis, gets the brand data and then gives it to the LLM to change.")
 def llm_competitor_analysis(request: ScrapeRequest):
 
     main_brand_url = str(request.website_url)
